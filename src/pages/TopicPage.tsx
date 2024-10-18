@@ -20,11 +20,11 @@ const TopicPage = () => {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
                 },
-                body: JSON.stringify({
-                    topicName: topicName,
-                    createdByUser: userId,
-                }),
+                body: JSON.stringify({topicName: topicName,
+                    createdByUser: userId
+                 }),
             });
 
             if (!response.ok) {
@@ -68,8 +68,11 @@ const TopicPage = () => {
             return;
         }
         try {
-            const response = await fetch(`${API_URL}/topic/deleteTopic?topicId=${topicId}&userId=${userId}`, {
+            const response = await fetch(`${API_URL}/topic/deleteTopic?topicId=${topicId}&userId2=${userId}`, {
                 method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
             });
 
             if (!response.ok) {

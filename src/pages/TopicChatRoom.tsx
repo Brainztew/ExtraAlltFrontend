@@ -18,12 +18,7 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
   const [listOfMessages, setListOfMessages] = useState<Message[]>([]);
   const [messageFromUser, setMessageFromUser] = useState<string>("");
   const [welcomeSent, setWelcomeSent] = useState<boolean>(false);
-
-  useSubscription(`/topic/welcome/${topicId}`, (message) => {
-    const parsed = JSON.parse(message.body);
-    console.log(parsed);
-    setListOfMessages((prevMessages) => [...prevMessages, parsed]);
-  });
+  const [messagesLoaded, setMessagesLoaded] = useState<boolean>(false);
 
   useSubscription(`/topic/${topicId}`, (message) => {
     const parsed = JSON.parse(message.body);
@@ -59,27 +54,90 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
         }),
       });
       setWelcomeSent(true);
+      joinTopic();
     }
   };
 
-  const loadMessages = (topicId: string) => {
-    fetch(`${API_URL}/api/Topic/${topicId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        data.forEach((message: Message) => {
-          setListOfMessages((prevMessages) => [...prevMessages, message]);
-        });
+  const joinTopic = async () => {
+    const userId = localStorage.getItem("userId");
+    
+    try {
+      const response = await fetch(`${API_URL}/topic/joinTopic?userId=${userId}&topicId=${topicId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ topicId: topicId, userId: userId }),
       });
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert(errorText);
+        return;
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred");
+    }
+  }
+
+  const loadMessages = async (topicId: string) => {
+    try {
+      const response = await fetch(`${API_URL}/topic/getMessagesInTopic?topicId=${topicId}`);
+      if (!response.ok) {
+        throw new Error("Failed to load messages");
+      }
+      const data = await response.json();
+      const messages = data.map((msg: string) => {
+        const [sender, content] = msg.split(": ");
+        return { sender, content, topicId };
+      });
+      setListOfMessages(messages);
+      setMessagesLoaded(true); 
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
   };
 
+  const leaveTopic = async () => {
+    const userId = localStorage.getItem("userId");
+    try {
+      const response = await fetch(`${API_URL}/topic/leaveTopic?userId=${userId}&topicId=${topicId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ topicId: topicId, userId: userId }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert(errorText);
+        return;
+      }
+      window.location.href = "/";
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred");
+    }
+  }
+
   useEffect(() => {
-    sendWelcome();
-    loadMessages(topicId);
+    const initializeChat = async () => {
+      await loadMessages(topicId);
+      sendWelcome();
+    };
+
+    initializeChat();
   }, [topicId]);
+
+  if (!messagesLoaded) {
+    return <div>Loading messages...</div>; 
+  }
+
 
   return (
     <>
-      <p>Chatfönster</p>
+      <p>Chatwindow</p>
+      <button onClick={leaveTopic}>Leave Topic</button>
       <form onSubmit={sendWebsocketMessage}>
         <input
           type="text"

@@ -31,10 +31,11 @@ const LoginPage: React.FC<Props> = ( { setIsLogged, isLogged }) => {
             return;
         }
         const data = await response.json();
-        const { token, userId } = data;
+        const { token, userId, userEmail } = data;
     
         localStorage.setItem("token", token);
         localStorage.setItem("userId", userId);
+        localStorage.setItem("userEmail", userEmail);
         setIsLogged(true);
         console.log(token);
         console.log(userId);

@@ -11,6 +11,8 @@ interface topic {
 const TopicPage = () => {
     const [topicName, setTopicName] = useState<string>("");
     const [topics, setTopics] = useState<topic[]>([]);
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [filteredTopics, setFilteredTopics] = useState<topic[]>([]);
     const [hasJoinedTopic, setHasJoinedTopic] = useState<boolean>(false);
     const [joinedTopicName, setJoinedTopicName] = useState<string>("");
     const [topicId, setTopicId] = useState<string>("");
@@ -60,6 +62,7 @@ const TopicPage = () => {
                 }
                 const data = await response.json();
                 setTopics(data);
+                setFilteredTopics(data);
                 console.log(data);
             }  catch (error) {
                     console.error(error);
@@ -70,12 +73,17 @@ const TopicPage = () => {
         useEffect(() => {
             fetchTopics();
     }, []);
-
+        
     const deleteTopic = async (topicId: string) => {
         if (!token) {
             alert("You need to be logged in to delete a topic");
             return;
         }
+        const confirmDelete = window.confirm("Are you sure you want to delete this topic?");
+        if (!confirmDelete) {
+            return;
+        }
+
         try {
             const response = await fetch(`${API_URL}/topic/deleteTopic?topicId=${topicId}&userId2=${userId}`, {
                 method: "DELETE",
@@ -105,6 +113,14 @@ const TopicPage = () => {
         setTopicId(topicId);
     }
 
+    const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(event.target.value);
+        const filteredTopics = topics.filter((topic) => {
+            return topic.topicName.toLowerCase().includes(event.target.value.toLowerCase());
+        });
+        setFilteredTopics(filteredTopics);
+    }
+
 
 
     return (
@@ -126,9 +142,17 @@ const TopicPage = () => {
                         </form>
                     </div>
                     <div>
-                        <h3>Created topics:</h3>
-                        {topics.map((topic) => (
-                            <div key={topic.topicId}>
+                        <h3>Search:</h3>
+                        <input className="searchTopics"
+                            type="text"
+                            placeholder="Search topics"
+                            value={searchQuery}
+                            onChange={handleSearch} />
+                           
+                        <h3>Created topics:</h3> 
+                        <div className="topicGridContainer">
+                        {filteredTopics.map((topic) => (
+                            <div className="topicGrid" key={topic.topicId}>
                                 <button onClick={() => joinTopicChatRoom(topic.topicId, topic.topicName)}>{topic.topicName}</button>
                                 {topic.createdByUser === userId && (
                                     <button className="removeTopicBtn" onClick={() => deleteTopic(topic.topicId)}>X</button>
@@ -136,6 +160,7 @@ const TopicPage = () => {
                             </div>
                         ))}
                     </div>
+                </div>
                 </>
             ) : (
                 <div>

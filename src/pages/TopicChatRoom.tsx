@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -19,8 +19,21 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
   const [messageFromUser, setMessageFromUser] = useState<string>("");
   const [welcomeSent, setWelcomeSent] = useState<boolean>(false);
   const [messagesLoaded, setMessagesLoaded] = useState<boolean>(false);
+  const [usersInTopic, setUsersInTopic] = useState<string[]>([]);
+  const chatboxRef = useRef<HTMLUListElement>(null);
 
   useSubscription(`/topic/${topicId}`, (message) => {
+    const parsed = JSON.parse(message.body);
+    console.log(parsed);
+    setListOfMessages((prevMessages) => [...prevMessages, parsed]);
+  });
+
+  useSubscription(`/topic/update/${topicId}`, () => {
+    getUsersInTopic();
+
+  });
+
+  useSubscription(`/topic/welcome/${topicId}`, (message) => {
     const parsed = JSON.parse(message.body);
     console.log(parsed);
     setListOfMessages((prevMessages) => [...prevMessages, parsed]);
@@ -120,40 +133,84 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
     }
   }
 
+  const getUsersInTopic = async () => {
+    try {
+      const response = await fetch(`${API_URL}/topic/getUsersInTopic?topicId=${topicId}`);
+      if (!response.ok) {
+        throw new Error("Failed to load users");
+      }
+      const data = await response.json();
+      setUsersInTopic(data);
+    } catch (error) {
+      console.error("Error loading users:", error);
+    }
+  }
+
+  useEffect(() => {
+    if (chatboxRef.current) {
+      console.log("Scrolling to bottom");
+      
+      chatboxRef.current.scrollTop = chatboxRef.current.scrollHeight;
+    }
+  }, [listOfMessages]);
+
+ 
+  
   useEffect(() => {
     const initializeChat = async () => {
       await loadMessages(topicId);
       sendWelcome();
+      getUsersInTopic();
     };
 
     initializeChat();
   }, [topicId]);
 
-  if (!messagesLoaded) {
+ if (!messagesLoaded) {
     return <div>Loading messages...</div>; 
   }
 
+  const userEmail = localStorage.getItem("userEmail")!;
 
   return (
     <>
-      <p>Chatwindow</p>
+      <p>Write "Hey bot" to make the ai answer your call!</p>
       <button onClick={leaveTopic}>Leave Topic</button>
-      <form onSubmit={sendWebsocketMessage}>
-        <input
-          type="text"
-          name="messageFromUser"
-          value={messageFromUser}
-          onChange={(e) => setMessageFromUser(e.target.value)}
-        />
-        <button type="submit">Send</button>
-      </form>
-      <ul>
-        {listOfMessages.map((message, index) => (
-          <li key={index}>
-            {message.sender}: {message.content}
-          </li>
-        ))}
-      </ul>
+        <div className="chatContainer">
+        <ul className="Chatbox" ref={chatboxRef}>
+          {listOfMessages.map((message, index) => (
+            <li 
+            key={index}
+            className={
+              message.sender === userEmail
+              ? "user-msg"
+              : message.sender === "System"
+              ? "ai-msg"
+              : "other-msg"
+            }
+            >
+              {message.sender}: {message.content}
+            </li>
+          ))}
+        </ul>      
+        <div>
+        <h3>Users in topic:</h3>
+        <ul>
+          {usersInTopic.map((user, index) => (
+            <li key={index}>{user}</li>
+          ))}
+        </ul>
+        </div>
+        </div>
+        <form className="sendField" onSubmit={sendWebsocketMessage}>
+          <textarea
+            className="messageInputField"
+            name="messageFromUser"
+            value={messageFromUser}
+            onChange={(e) => setMessageFromUser(e.target.value)}
+          />
+          <button id="sendChatBtn"type="submit">Send</button>
+        </form>
     </>
   );
 };

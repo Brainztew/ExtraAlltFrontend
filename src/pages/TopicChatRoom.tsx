@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
+import AiAnswer from "../components/AiAnswer";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -33,26 +34,58 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
 
   });
 
+  useSubscription(`/topic/aianswer/${topicId}`, (message) => {
+    const parsed = JSON.parse(message.body);
+    console.log(parsed);
+    setListOfMessages((prevMessages) => [...prevMessages, parsed]);
+    loadMessages(topicId);
+  });
+
   useSubscription(`/topic/welcome/${topicId}`, (message) => {
     const parsed = JSON.parse(message.body);
     console.log(parsed);
     setListOfMessages((prevMessages) => [...prevMessages, parsed]);
   });
 
-  const sendWebsocketMessage = (event: React.FormEvent<HTMLFormElement>) => {
+  const sendWebsocketMessage = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const email = localStorage.getItem("userEmail")!;
+    let content = messageFromUser;
+
     if (stompClient) {
       stompClient.publish({
         destination: `/app/${topicId}`,
         body: JSON.stringify({
           sender: email,
-          content: messageFromUser,
+          content: content,
           topicId: topicId,
         }),
       });
       setMessageFromUser("");
     }
+    if (content.includes("Hey bot")) {
+      content = content.replace("Hey bot", "").trim();
+      try {
+        const response = await fetch(`${API_URL}/topic/addAiMessageToTopic?topicId=${topicId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(content),
+        });
+        if (!response.ok) {
+          const errorText = await response.text();
+          alert(errorText);
+          return;
+        }
+      } catch (error) {
+        console.error("Error sending AI message:", error);
+        alert("An error occurred while sending AI message");
+        return;
+      }
+    }
+
+
   };
 
   const sendWelcome = () => {
@@ -184,7 +217,7 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
             className={
               message.sender === userEmail
               ? "user-msg"
-              : message.sender === "System"
+              : message.sender === "System" || message.sender === "AI bot"
               ? "ai-msg"
               : "other-msg"
             }

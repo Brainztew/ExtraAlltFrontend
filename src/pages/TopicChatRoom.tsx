@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { useStompClient, useSubscription } from "react-stomp-hooks";
-import AiAnswer from "../components/AiAnswer";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -83,9 +82,8 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
         alert("An error occurred while sending AI message");
         return;
       }
+      loadMessages(topicId);
     }
-
-
   };
 
   const sendWelcome = () => {

@@ -7,6 +7,8 @@ import RegisterPage from './pages/RegisterPage';
 import TopicPage from './pages/TopicPage';
 import Menu from './components/Menu';
 import { StompSessionProvider } from "react-stomp-hooks";
+import SuccessPage from './pages/SuccessPage';
+import CancelPage from './pages/CancelPage';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -44,6 +46,10 @@ function App() {
         return <RegisterPage />;
       case "TopicPage":
         return <TopicPage />;
+      case "SuccessPage":
+        return <SuccessPage />
+      case "CancelPage":
+        return <CancelPage />
       default:
         return <AboutPage />;
     }

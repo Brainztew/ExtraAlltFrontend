@@ -22,10 +22,15 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
   const [usersInTopic, setUsersInTopic] = useState<string[]>([]);
   const chatboxRef = useRef<HTMLUListElement>(null);
 
-  useSubscription(`/topic/${topicId}`, (message) => {
+ useSubscription(`/topic/${topicId}`, (message) => {
     const parsed = JSON.parse(message.body);
     console.log(parsed);
-    setListOfMessages((prevMessages) => [...prevMessages, parsed]);
+    setListOfMessages((prevMessages) => {
+      if (!prevMessages.some((msg) => msg.content === parsed.content && msg.sender === parsed.sender)) {
+        return [...prevMessages, parsed];
+      }
+      return prevMessages;
+    });
   });
 
   useSubscription(`/topic/update/${topicId}`, () => {
@@ -60,29 +65,49 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
           topicId: topicId,
         }),
       });
+      setListOfMessages((prevMessages) => [
+        ...prevMessages,
+        { sender: email, content: content, topicId: topicId },
+      ]);
       setMessageFromUser("");
     }
     if (content.includes("Hey bot")) {
-      content = content.replace("Hey bot", "").trim();
-      try {
-        const response = await fetch(`${API_URL}/topic/addAiMessageToTopic?topicId=${topicId}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(content),
-        });
-        if (!response.ok) {
-          const errorText = await response.text();
-          alert(errorText);
-          return;
-        }
-      } catch (error) {
-        console.error("Error sending AI message:", error);
-        alert("An error occurred while sending AI message");
+      answerMeBot(content);
+    }
+  };
+
+  const answerMeBot = async (content: string) => {
+    const originalContent = content;
+    content = content.replace("Hey bot", "").trim();
+    try {
+      const response = await fetch(`${API_URL}/topic/addAiMessageToTopic?topicId=${topicId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content }),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert(errorText);
         return;
       }
-      loadMessages(topicId);
+      const aiResponse = await response.text(); 
+      if (stompClient) {
+        stompClient.publish({
+          destination: `/app/aianswer/${topicId}`,
+          body: JSON.stringify({
+            sender: "AI bot",
+            content: aiResponse,
+            topicId: topicId,
+          }),
+        });
+      }
+    
+    } catch (error) {
+      console.error("Error sending AI message:", error);
+      alert("An error occurred while sending AI message");
+      return;
     }
   };
 

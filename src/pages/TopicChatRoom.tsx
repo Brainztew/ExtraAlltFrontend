@@ -77,7 +77,6 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
   };
 
   const answerMeBot = async (content: string) => {
-    const originalContent = content;
     content = content.replace("Hey bot", "").trim();
     try {
       const response = await fetch(`${API_URL}/topic/addAiMessageToTopic?topicId=${topicId}`, {

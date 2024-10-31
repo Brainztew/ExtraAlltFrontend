@@ -181,7 +181,7 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
         alert(errorText);
         return;
       }
-      window.location.href = `${API_URL}/?page=TopicPage`;
+      window.location.href = `https://coral-app-ei5fb.ondigitalocean.app/?page=TopicPage`;
     } catch (error) {
       console.error(error);
       alert("An error occurred");

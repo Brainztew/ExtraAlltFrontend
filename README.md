@@ -1,5 +1,6 @@
 # ExtraAlltFrontend
 
+
 ## För att starta backend:
 1. Se till att ha mongodb installerat
 2. Se till så du har java version 17 eller senare
@@ -13,6 +14,7 @@ openai.api.key=${OPENAI_API_KEY}
 8. Du kan övervaka databasen med Studio3T eller MongodbCompass
 9. Starta projektet
 10. Ifall du vill få tillgång till data finns databas medskickat i rooten i mappen Local_DB
+11. I stripeController.java behövs ändras i .setsucessUrl och .setCancelUrl till `http://localhost:5173/?page=SuccessPage` och `http://localhost:5173/?page=CancelPage`
 
 ## För att starta frontend:
 1. Se till att ha node.js installerat
@@ -22,6 +24,8 @@ openai.api.key=${OPENAI_API_KEY}
 5. Kör kommando i terminalen "npm install" för att installera dependencies
 6. Kör kommando i terminalen "npm run dev" för att starta applikationen
 7. Öppna applikationen, du får fram en port (brukar vara "http://localhost:5173/")
+8. På rad 184 i TopicChatRoom.tsx finns en windows.location.href som behöver ändras från deployade till `http://localhost:5173/?page=TopicPage`
+
 
 ## I Backend kan du:
 1. Registrera användare

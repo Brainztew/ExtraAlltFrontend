@@ -68,8 +68,14 @@ function App() {
         <Menu setPage={setPage} isLogged={isLogged} setIsLogged={setIsLogged}/>
         {renderPage()}
       </StompSessionProvider>
+      
+      <footer className="footer">
+      <p>&copy; 2024 Ask A Bot. All rights reserved.</p>
+      </footer>
     </>
   )
 }
+
+
 
 export default App

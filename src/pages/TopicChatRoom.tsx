@@ -181,7 +181,7 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
         alert(errorText);
         return;
       }
-      window.location.href = "/Topicpage?page=TopicPage";
+      window.location.href = `${API_URL}/topic/getUsersInTopic?topicId=${topicId}`;
     } catch (error) {
       console.error(error);
       alert("An error occurred");
@@ -190,7 +190,7 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
 
   const getUsersInTopic = async () => {
     try {
-      const response = await fetch(`${API_URL}/topic/getUsersInTopic?topicId=${topicId}`);
+      const response = await fetch(`${API_URL}/Topicpage?page=TopicPage`);
       if (!response.ok) {
         throw new Error("Failed to load users");
       }

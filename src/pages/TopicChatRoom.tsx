@@ -91,17 +91,17 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
         alert(errorText);
         return;
       }
-      const aiResponse = await response.text(); 
+    const aiResponse = await response.text(); 
       if (stompClient) {
         stompClient.publish({
-          destination: `/app/aianswer/${topicId}`,
+          destination: `/app/${topicId}`,
           body: JSON.stringify({
             sender: "AI bot",
             content: aiResponse,
             topicId: topicId,
           }),
         });
-      }
+      } 
     
     } catch (error) {
       console.error("Error sending AI message:", error);
@@ -181,7 +181,7 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
         alert(errorText);
         return;
       }
-      window.location.href = "/";
+      window.location.href = "/Topicpage?page=TopicPage";
     } catch (error) {
       console.error(error);
       alert("An error occurred");

@@ -9,6 +9,7 @@ import Menu from './components/Menu';
 import { StompSessionProvider } from "react-stomp-hooks";
 import SuccessPage from './pages/SuccessPage';
 import CancelPage from './pages/CancelPage';
+import DigitalArtPage from './pages/DigitalArtPage';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -50,6 +51,8 @@ function App() {
         return <SuccessPage />
       case "CancelPage":
         return <CancelPage />
+      case "DigitalArtPage":
+        return <DigitalArtPage />;
       default:
         return <AboutPage />;
     }
@@ -65,8 +68,14 @@ function App() {
         <Menu setPage={setPage} isLogged={isLogged} setIsLogged={setIsLogged}/>
         {renderPage()}
       </StompSessionProvider>
+      
+      <footer className="footer">
+      <p>&copy; 2024 Ask A Bot. All rights reserved.</p>
+      </footer>
     </>
   )
 }
+
+
 
 export default App

@@ -122,6 +122,8 @@ const MerchandisePage = () => {
                 <button onClick={checkout} className="buyBtn">Proceed to checkout</button>
             </div>
             )}
+           {!isCartOpen && (
+            <div>
             {items.map((item) => (
                 <div className="productBox" key={item.itemId}>
                     <h3>{item.title}</h3>
@@ -133,7 +135,8 @@ const MerchandisePage = () => {
                 </div>
             ))}
             
- 
+            </div>
+            )}
        </>
     );
 };

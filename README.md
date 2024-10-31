@@ -59,4 +59,5 @@ Jag har gjort ett forum som använder websocket som kommunkation och Ai funktion
 ## Länkar:
 Backend: https://github.com/Brainztew/ExtraAlltBackend <br>
 Frontend: https://github.com/Brainztew/ExtraAlltFrontend <br>
-Deployad: https://coral-app-ei5fb.ondigitalocean.app/?page=start
+Deployad: https://coral-app-ei5fb.ondigitalocean.app/?page=start <br>
+Slideshow: https://www.canva.com/design/DAGVI-HkoXY/DjPMkqfQKB54_vLWVEkLdg/edit?utm_content=DAGVI-HkoXY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton

@@ -181,7 +181,7 @@ const TopicChatRoom: React.FC<TopicChatRoomProps> = ({ topicId }) => {
         alert(errorText);
         return;
       }
-      window.location.href = `${API_URL}/?page=TopicPage}`;
+      window.location.href = `${API_URL}/?page=TopicPage`;
     } catch (error) {
       console.error(error);
       alert("An error occurred");
